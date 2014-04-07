@@ -1,0 +1,2 @@
+import test_scale_manager
+import test_scale
