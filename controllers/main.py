@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import time
 import openerp
 from ..helpers.usbscale.scale import Scale
 from ..helpers.usbscale.scale_manager import ScaleManager
@@ -14,25 +15,45 @@ class ScaleController(openerp.addons.web.http.Controller):
             usb_lib=mocks.usb_lib.MockUSBLib()
         )
         self.mock_endpoint = mocks.usb_lib.MockEndpoint(0, 0)
+        self._last_weighing = None
         super(ScaleController, self).__init__(*args, **kwargs)
 
     @openerp.addons.web.http.jsonrequest
-    def weigh(self, request, max_attempts=10, test_weight=None):
+    def weigh(self, request, timeout=None, test_weight=None):
         '''Get a reading from the attached USB scale.'''
+        scale = self.scale
 
-        # Are we running an integration test...
+        # Try to calculate when the request will force a return, based on the
+        # passed-in timeout parameter. Default to returning after first reading
+        # if the timeout parameter is not either a valid number or "inf".
+        try:
+            end_time = time.time() + (float(timeout) if timeout else 0)
+        except:
+            end_time = 0
+
         if test_weight:
             scale = Scale(device_manager=self.mock_manager)
-            scale.device.set_weight(test_weight)
-            weighing = scale.weigh(
-                endpoint=self.mock_endpoint, max_attempts=float(max_attempts)
-            )
 
-        # ...or are we doing an actual weighing?
-        if not test_weight:
-            weighing = self.scale.weigh(max_attempts=float(max_attempts))
+        weighing = self._weigh(scale, test_weight=test_weight)
+
+        # Loop until we see a change or until the request times out.
+        while time.time() < end_time and weighing == self._last_weighing:
+            weighing = self._weigh(scale, test_weight=test_weight)
 
         if weighing:
+            self._last_weighing = weighing
             return {'success': True, 'weight': weighing.weight, 'unit': weighing.unit}
 
         return {'success': False, 'error': "Could not read scale"}
+
+    def _weigh(self, scale, test_weight = None):
+        # Are we running an integration test...
+        if test_weight:
+            scale.device.set_weight(test_weight)
+            weighing = scale.weigh(endpoint=self.mock_endpoint)
+
+        # ...or are we doing an actual weighing?
+        if not test_weight:
+            weighing = scale.weigh()
+
+        return weighing

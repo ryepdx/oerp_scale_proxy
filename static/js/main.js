@@ -34,10 +34,13 @@ openerp.scale_proxy = function (instance) {
         },
 
         // Convenience function for getting a reading from the local scale.
-        weigh: function (test_weight) {
+        weigh: function (timeout, test_weight) {
             params = {};
             if (test_weight) {
                 params.test_weight = test_weight;
+            }
+            if (timeout) {
+                params.long_poll = timeout;
             }
             return this.message("weigh", params);
         }
@@ -46,7 +49,7 @@ openerp.scale_proxy = function (instance) {
     // Client actions
     instance.scale_proxy.weigh = function (parent, action) {
         var scale = new instance.scale_proxy.Scale();
-        return scale.weigh(action.params.test_weight);
+        return scale.weigh(action.params.timeout, action.params.test_weight);
     }
     instance.web.client_actions.add('scale_proxy.weigh', "instance.scale_proxy.weigh");
 };
