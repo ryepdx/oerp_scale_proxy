@@ -25,12 +25,12 @@ class ScaleController(openerp.addons.web.http.Controller):
             scale = Scale(device_manager=self.mock_manager)
             scale.device.set_weight(test_weight)
             weighing = scale.weigh(
-                endpoint=self.mock_endpoint, max_attempts=max_attempts
+                endpoint=self.mock_endpoint, max_attempts=float(max_attempts)
             )
 
         # ...or are we doing an actual weighing?
         if not test_weight:
-            weighing = self.scale.weigh(max_attempts=max_attempts)
+            weighing = self.scale.weigh(max_attempts=float(max_attempts))
 
         if weighing:
             return {'success': True, 'weight': weighing.weight, 'unit': weighing.unit}
