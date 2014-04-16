@@ -40,7 +40,7 @@ openerp.scale_proxy = function (instance) {
                 params.test_weight = test_weight;
             }
             if (timeout) {
-                params.long_poll = timeout;
+                params.timeout = timeout;
             }
             return this.message("weigh", params);
         }
