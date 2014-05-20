@@ -3,34 +3,45 @@ openerp.scale_proxy = function (instance) {
     instance.scale_proxy.Scale  = instance.web.Class.extend({
         init: function(options){
             options = options || {};
+            console.log(instance.web.JsonRPC);
 
-            this.connection = new instance.web.JsonRPC();
-            this.connection.setup(options.url || 'http://localhost:8069');
+            this.req_id = 1;
+            this.url = (options.url || 'https://localhost:5000/api');
+            this.auth = {
+                username: "ryan",
+                password: "Password1"
+            };
             this.notifications = {};
         },
 
-        // Makes a JSON-RPC call to the local OpenERP server.
-        message : function(name,params){
+        message: function (method, params) {
             var ret = new $.Deferred();
-            var callbacks = this.notifications[name] || [];
-            for(var i = 0; i < callbacks.length; i++){
-                callbacks[i](params);
+            var data = {
+                id: this.req_id,
+                jsonrpc: "2.0",
+                method: method,
+                params: params
             }
 
-            this.connection.rpc('/scale_proxy/' + name, params || {}).done(function(result) {
-                ret.resolve(result);
-            }).fail(function(error) {
-                ret.reject(error);
+            jQuery.ajax({
+              type: "POST",
+              url: this.url,
+              dataType: 'json',
+              async: true,
+              headers: {
+                "Authorization": "Basic " + btoa(this.auth.username + ":" + this.auth.password)
+              },
+              data: JSON.stringify(data),
+              success: function (response) {
+                  ret.resolve(response.result);
+              },
+              fail: function (response) {
+                  ret.reject(response.error);
+              }
             });
-            return ret;
-        },
+            this.req_id++;
 
-        // Allows triggers to be set for when particular JSON-RPC function calls are made via 'message.'
-        add_notification: function(name, callback){
-            if(!this.notifications[name]){
-                this.notifications[name] = [];
-            }
-            this.notifications[name].push(callback);
+            return ret;
         },
 
         // Convenience function for getting a reading from the local scale.
