@@ -3,10 +3,9 @@ openerp.scale_proxy = function (instance) {
     instance.scale_proxy.Scale  = instance.web.Class.extend({
         init: function(options){
             options = options || {};
-            console.log(instance.web.JsonRPC);
 
             this.req_id = 1;
-            this.url = (options.url || 'https://localhost:5000/api');
+            this.url = (options.url || 'https://localhost:443/api');
             this.auth = {
                 username: "ryan",
                 password: "Password1"
@@ -31,11 +30,12 @@ openerp.scale_proxy = function (instance) {
               headers: {
                 "Authorization": "Basic " + btoa(this.auth.username + ":" + this.auth.password)
               },
+              crossDomain: true,
               data: JSON.stringify(data),
               success: function (response) {
                   ret.resolve(response.result);
               },
-              fail: function (response) {
+              error: function (response) {
                   ret.reject(response.error);
               }
             });
