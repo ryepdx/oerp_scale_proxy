@@ -5,10 +5,10 @@ openerp.scale_proxy = function (instance) {
             options = options || {};
 
             this.req_id = 1;
-            this.url = (options.url || 'https://localhost:443/api');
+            this.url = (options.url || 'https://127.0.0.1:443/api');
             this.auth = {
-                username: "ryan",
-                password: "Password1"
+                username: options.username || "ryan",
+                password: options.password || "Password1"
             };
             this.notifications = {};
         },
@@ -59,7 +59,9 @@ openerp.scale_proxy = function (instance) {
 
     // Client actions
     instance.scale_proxy.weigh = function (parent, action) {
-        var scale = new instance.scale_proxy.Scale();
+        var scale = new instance.scale_proxy.Scale({
+            'url': action.params.url, 'username': action.params.username, 'password': action.params.password
+        });
         return scale.weigh(action.params.timeout, action.params.test_weight);
     }
     instance.web.client_actions.add('scale_proxy.weigh', "instance.scale_proxy.weigh");
