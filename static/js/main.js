@@ -7,8 +7,8 @@ openerp.scale_proxy = function (instance) {
             this.req_id = 1;
             this.url = (options.url || 'https://127.0.0.1:443/api');
             this.auth = {
-                username: options.username || "ryan",
-                password: options.password || "Password1"
+                username: options.username || "default_user",
+                password: options.password || "default_password"
             };
             this.notifications = {};
         },
