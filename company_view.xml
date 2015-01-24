@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+		<record id="company_scale_proxy" model="ir.ui.view">
+			<field name="name">res.company.scale_proxy.config</field>
+			<field name="model">res.company</field>
+			<field name="inherit_id" ref="base.view_company_form"/>
+			<field name="arch" type="xml">
+                <xpath expr="//notebook/page[@string='Configuration']" position="inside">
+					<newline/>
+					<separator string="Scale Proxy Settings" colspan="4"/>
+					<newline/>
+                    <group colspan="4" col="4">
+                        <field name="scale_proxy_url" />
+                        <field name="scale_proxy_username" />
+                        <field name="scale_proxy_password" />
+                    </group>
+				</xpath>
+			</field>
+		</record>
+	</data>
+</openerp>
